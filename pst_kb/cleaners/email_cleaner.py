@@ -19,8 +19,8 @@ class EmailCleaner:
     """Heuristic cleaner tuned for mixed Hebrew and English corporate email."""
 
     REPLY_SEPARATOR_PATTERNS = [
-        re.compile(r"^-{2,}\s*Original Message\s*-{2,}$", re.IGNORECASE),
-        re.compile(r"^_{2,}\s*$"),
+        re.compile(r"^-{2,}\s*(Original Message|הודעה מקורית)\s*-{2,}$", re.IGNORECASE),
+        re.compile(r"^_{5,}\s*$"),
         re.compile(r"^\s*From:\s+.+", re.IGNORECASE),
         re.compile(r"^\s*Sent:\s+.+", re.IGNORECASE),
         re.compile(r"^\s*To:\s+.+", re.IGNORECASE),
@@ -31,11 +31,12 @@ class EmailCleaner:
         re.compile(r"^\s*נושא:\s+.+"),
         re.compile(r"^\s*בתאריך\s+.+כתב/?ה?:\s*$"),
         re.compile(r"^\s*On\s+.+wrote:\s*$", re.IGNORECASE),
+        re.compile(r"^\s*Begin forwarded message:", re.IGNORECASE),
     ]
     SIGNATURE_PATTERNS = [
         re.compile(r"^--\s*$"),
-        re.compile(r"^\s*(best regards|kind regards|regards|thanks|thank you|sincerely),?\s*$", re.IGNORECASE),
-        re.compile(r"^\s*(בברכה|תודה|תודה רבה|בכבוד רב),?\s*$"),
+        re.compile(r"^\s*(best regards|kind regards|regards|thanks|thank you|sincerely|yours|cheers),?\s*$", re.IGNORECASE),
+        re.compile(r"^\s*(בברכה|תודה|תודה רבה|בכבוד רב|בברכת חברים|יום טוב|שבת שלום),?\s*$"),
     ]
     QUOTED_LINE_PATTERN = re.compile(r"^\s*[>|]\s?")
 
