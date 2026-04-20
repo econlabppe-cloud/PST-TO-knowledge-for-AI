@@ -1,88 +1,113 @@
 # PST-TO-knowledge-for-AI
 
-Turn a dusty Outlook PST archive into a living knowledge asset.
-This toolkit takes thousands of emails that usually sit buried in a mailbox, extracts them cleanly, organizes them into meaningful topics, and turns the result into a searchable knowledge base that can power NotebookLM, semantic search, FAQ generation, and human review.
+Your organization already has a knowledge base. It is just trapped inside years of email.
 
-Instead of treating email as storage, it turns email into memory.
-Instead of a mailbox full of noise, it gives you a structured corpus people can actually use.
+PST-TO-knowledge-for-AI turns an Outlook archive into a clean, searchable, NotebookLM-ready knowledge system. It takes the conversations, decisions, answers, attachments, recurring questions, and hidden expertise buried in a mailbox, then reshapes them into organized Word documents and structured data that can become the foundation for an internal knowledge bot.
+
+For non-technical teams, the idea is simple: export the mailbox, run the pipeline, upload the Word files to NotebookLM, and start asking questions against years of real organizational memory.
+
+## The promise
+
+Most important knowledge never reaches a formal knowledge base.
+It lives in emails: answers from experienced employees, decisions made in long threads, explanations sent once and forgotten, supplier discussions, legal clarifications, pension calculations, user requests, and operational know-how.
+
+This project helps recover that knowledge and make it usable again.
+
+With it, a team can:
+
+- turn an old Outlook archive into a searchable knowledge source
+- ask NotebookLM questions based on real historical correspondence
+- search by topic, person, thread, or recurring issue
+- discover patterns across years of work
+- prepare the ground for FAQ creation, semantic search, and an internal AI assistant
+- preserve institutional memory before it disappears inside inboxes
 
 ## What this project does
 
-- Extracts emails from PST files with a pluggable pipeline
-- Cleans and normalizes bodies in Hebrew and English
-- Reconstructs threads and keeps metadata
-- Detects duplicates and system noise
-- Classifies content into knowledge-oriented topics
-- Exports structured data for analytics, search, and review
-- Builds Word-based NotebookLM packs from the archive
-- Creates a path from raw mail to a real knowledge bot
+- Extracts email from Outlook PST archives
+- Converts extracted messages into structured records
+- Cleans messy email bodies in Hebrew and English
+- Removes boilerplate, repeated quotes, auto-replies, and system noise
+- Preserves metadata such as sender, recipients, date, folder, subject, and thread signals
+- Marks duplicate messages instead of deleting evidence
+- Groups content into knowledge-oriented topics
+- Builds NotebookLM-ready Word documents
+- Creates topic maps and people maps so users know what to upload and where to look
 
-## What is not included
+## End-to-end workflow
 
-- No PST files
-- No generated outputs
-- No caches
-- No virtual environment
-- No Cygwin64 Terminal bundle
+The full path is:
 
-## Requirements
+1. Export a PST file from Outlook.
+2. Use Cygwin64 Terminal with `readpst` to extract the mailbox into message files.
+3. Run the Python pipeline on the extracted material.
+4. Clean, classify, and organize the archive.
+5. Build a Word-based NotebookLM pack.
+6. Upload the Word files to NotebookLM.
+7. Use NotebookLM as a knowledge bot over the email archive.
 
-- Python 3.11+
-- `readpst` available in the Cygwin64 Terminal environment or in PATH
-- `python-docx` for Word-based NotebookLM packs
+## Step 1: Export a PST from Outlook
 
-## Step-by-step workflow
+In Outlook Desktop:
 
-### 1. Export the PST with Cygwin64 Terminal
+1. Open `File`.
+2. Choose `Open & Export`.
+3. Choose `Import/Export`.
+4. Select `Export to a file`.
+5. Choose `Outlook Data File (.pst)`.
+6. Select the mailbox or folder you want to export.
+7. Save the `.pst` file locally.
 
-The external extraction step uses `readpst`.
-You can run it from Cygwin64 Terminal as the execution environment.
-The repository does not include Cygwin itself, because it is only the launcher environment, not part of the codebase.
+Example target folder:
 
-Typical flow:
-
-```powershell
-readpst -e -8 -o ./staging ./your_mailbox.pst
+```text
+C:\pst_ai_project\pst_files\mailbox.pst
 ```
 
-What happens here:
+## Step 2: Extract with Cygwin64 Terminal
 
-- `-e` exports messages into separate files
-- `-8` keeps output in UTF-8
-- `-o` chooses the staging folder
+This project uses the external `readpst` tool for PST extraction.
+Cygwin64 Terminal can be used as the Windows environment for running `readpst`.
 
-### 2. Parse the extracted mail in Python
+Important: Cygwin64 Terminal itself is not included in this repository.
+It is an external runtime environment, not project code.
 
-The toolkit reads the exported message files, extracts metadata, and normalizes each message into a structured record.
+Typical extraction command:
 
-### 3. Clean and organize the archive
+```bash
+readpst -e -8 -o ./staging ./pst_files/mailbox.pst
+```
 
-The pipeline removes boilerplate, quoted chains, duplicate messages, and system noise.
-Then it groups the archive by topic, sender, and thread so the material becomes readable instead of chaotic.
+What the flags mean:
 
-### 4. Build a NotebookLM pack
+- `-e` exports messages as individual email files
+- `-8` keeps text in UTF-8
+- `-o ./staging` writes extracted files into the staging folder
 
-The project creates Word documents that NotebookLM can ingest well.
-These documents are shaped for real exploration: topic maps, people maps, review queues, and source packs.
+After this step, the PST archive is no longer a black box.
+It becomes a folder of message files that Python can parse, clean, classify, and export.
 
-### 5. Use the archive like a knowledge product
-
-At that point the mailbox is no longer just “emails”.
-It becomes a knowledge layer you can search, summarize, browse, and build on.
-
-## Install
+## Step 3: Install Python dependencies
 
 ```powershell
 pip install -r requirements.txt
 ```
 
-## Run the local pipeline
+Requirements:
+
+- Python 3.11+
+- `readpst` available through Cygwin64 Terminal or PATH
+- `python-docx` for Word-based NotebookLM exports
+
+## Step 4: Run the local PST pipeline
+
+Run the full local processing flow:
 
 ```powershell
 python main.py --input .\pst_files --output .\processed_output --recursive
 ```
 
-Useful flags:
+Useful options:
 
 - `--single-file path\to\file.pst`
 - `--skip-attachments`
@@ -90,32 +115,97 @@ Useful flags:
 - `--folder-path "Inbox\\Folder"`
 - `--limit 1000`
 
-## Build the NotebookLM pack
+The pipeline creates structured outputs such as:
+
+- message records
+- attachment metadata
+- thread summaries
+- duplicate markers
+- processing reports
+- optional SQLite tables
+
+## Step 5: Clean, cluster, and prepare the knowledge layer
+
+For the NotebookLM-oriented workflow:
+
+```powershell
+python clean_and_cluster.py --input-csv .\data\intermediate\emails_raw.csv --output-csv .\data\intermediate\emails_clustered.csv --embedding-backend tfidf
+```
+
+This step removes low-value noise, normalizes the text, and prepares the archive for topic-based browsing.
+
+## Step 6: Build the NotebookLM Word pack
 
 ```powershell
 python build_notebooklm_pack.py --input .\data\intermediate\emails_clustered.csv --output-dir .\data\output\notebooklm_pack_word
 ```
 
-Recommended upload order to NotebookLM:
+This creates Word documents designed for NotebookLM ingestion:
+
+- `00_INDEX.docx`
+- `01_TOPIC_MAP.docx`
+- `02_PEOPLE_MAP.docx`
+- `03_CLASSIFICATION_RULES.docx`
+- `04_REVIEW_QUEUE.docx`
+- `sources\*.docx`
+
+## Step 7: Upload to NotebookLM
+
+Recommended upload order:
 
 1. `00_INDEX.docx`
 2. `01_TOPIC_MAP.docx`
 3. `02_PEOPLE_MAP.docx`
 4. `03_CLASSIFICATION_RULES.docx`
-5. `sources\*.docx`
+5. The relevant files from `sources\`
 
-## Why this is valuable
+After upload, NotebookLM can answer questions based on the email archive.
+The Word format helps NotebookLM refer back to more specific places inside the source documents.
 
-This project helps teams move from inbox archaeology to actual knowledge work.
+Example questions:
 
-- Search by topic instead of hunting through folders
-- Search by sender instead of guessing where a thread went
-- Recover context from long, messy email chains
-- Surface patterns across years of mail
-- Turn recurring questions into reusable knowledge
-- Create a base for an internal assistant or bot that speaks from the archive
+- What topics appear most often in this mailbox?
+- Who handled pension continuity questions?
+- What decisions were made about a specific supplier?
+- What recurring issues appear in retiree requests?
+- Which emails mention calculations, eligibility, or legal review?
 
-In practice, this means the mailbox starts behaving like a living reference system instead of a dead archive.
+## Why this becomes a knowledge bot
+
+A normal mailbox answers nothing unless a human remembers what to search for.
+This project changes that.
+
+It turns raw correspondence into curated evidence:
+
+- topics become visible
+- people become navigable
+- threads become readable
+- repeated questions become reusable knowledge
+- NotebookLM can speak from organized source documents
+
+That is the difference between storing email and activating knowledge.
+
+## What is included
+
+- PST extraction adapter around `readpst`
+- EML parsing
+- Hebrew and English cleaning
+- normalization utilities
+- deduplication
+- thread reconstruction
+- classification heuristics
+- structured exporters
+- NotebookLM Word pack generation
+- topic and people search views
+
+## What is not included
+
+- No PST files
+- No private email data
+- No generated output files
+- No caches
+- No virtual environment
+- No Cygwin64 Terminal installer
 
 ## Main folders
 
@@ -128,7 +218,17 @@ In practice, this means the mailbox starts behaving like a living reference syst
 - `pst_kb/exporters` - file and SQLite export
 - `pst_kb/notebooklm` - NotebookLM pack builders and search views
 
-## GitHub upload
+## Who this is for
 
-This folder is already trimmed for repository upload.
-Copy it into a GitHub repository, commit it, and push it as the starting point for the project.
+This is useful for teams with years of operational knowledge buried in Outlook:
+
+- public sector teams
+- legal and compliance teams
+- pension and benefits teams
+- finance and procurement teams
+- customer service and case management teams
+- any organization where the real knowledge lives in email
+
+## Bottom line
+
+If your mailbox contains years of answers, decisions, and expertise, this project helps turn it into something people can actually use: a searchable, explainable, AI-ready knowledge base.
