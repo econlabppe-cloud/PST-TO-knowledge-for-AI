@@ -1,0 +1,52 @@
+# Sample configuration for PST Knowledge Base Builder.
+# CLI flags override relevant values here.
+
+input_dir: ./pst_files
+output_dir: ./processed_output
+recursive: true
+skip_attachments: false
+export_sqlite: false
+limit:
+single_file:
+folder_path:
+readpst_command: readpst
+keep_staging: false
+log_level: INFO
+
+# Used by likely_sender_type heuristics.
+internal_domains:
+  - example.org
+  - company.co.il
+
+# Optional words that help lightweight topic inference.
+topic_keywords:
+  pension:
+    - pension
+    - retirement
+    - פנסיה
+    - פרישה
+  payroll:
+    - salary
+    - payroll
+    - שכר
+    - תלוש
+  benefits:
+    - benefit
+    - זכאות
+    - הטבה
+
+# Optional extra sender classification hints.
+sender_type_keywords:
+  retiree:
+    - retiree
+    - retired
+    - גמלאי
+    - פנסיונר
+  family_member:
+    - daughter
+    - son
+    - spouse
+    - בת של
+    - בן של
+    - אשתו
+    - בעלה

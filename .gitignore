@@ -1,0 +1,17 @@
+﻿__pycache__/
+.pytest_cache/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+data/
+logs/
+*.pst
+*.zip
+*.docx
+*.csv
+*.json
+*.sqlite
+*.db
