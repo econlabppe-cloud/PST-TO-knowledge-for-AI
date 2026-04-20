@@ -7,7 +7,7 @@ from pst_kb.classifiers import HeuristicClassifier
 from pst_kb.cleaners import EmailCleaner
 from pst_kb.config import AppConfig
 from pst_kb.language import detect_language
-from pst_kb.models import AttachmentRecord, MessageRecord, RawMessage
+from pst_kb.models import AttachmentRecord, MessageRecord, RawMessage, Recipient
 from pst_kb.normalizers import detect_reply_forward_indicator, normalize_email, normalize_subject
 from pst_kb.utils.files import sanitize_filename
 from pst_kb.utils.hashing import sha256_bytes, sha256_text, stable_hash
@@ -16,6 +16,11 @@ logger = logging.getLogger(__name__)
 
 
 class MessageProcessor:
+    """
+    Coordinates the processing of a raw message into a structured record.
+    Handles cleaning, normalization, language detection, and classification.
+    """
+
     def __init__(self, config: AppConfig, output_dir: Path) -> None:
         self.config = config
         self.output_dir = output_dir
@@ -27,6 +32,9 @@ class MessageProcessor:
         )
 
     def process(self, raw: RawMessage) -> tuple[MessageRecord, list[AttachmentRecord]]:
+        """
+        Process a RawMessage into a MessageRecord and a list of AttachmentRecords.
+        """
         clean_result = self.cleaner.clean(raw.body_text_raw, raw.body_html_raw)
         subject_normalized = normalize_subject(raw.subject_raw)
         body_for_hash = clean_result.text or raw.body_text_raw or self.cleaner.html_to_text(raw.body_html_raw)
@@ -92,6 +100,9 @@ class MessageProcessor:
         return message, attachment_records
 
     def _build_attachment_records(self, record_id: str, raw: RawMessage) -> list[AttachmentRecord]:
+        """
+        Extract and save attachments from a raw message.
+        """
         records: list[AttachmentRecord] = []
         for index, payload_info in enumerate(raw.attachment_payloads, start=1):
             original_filename = str(payload_info.get("filename") or f"attachment_{index}")
@@ -141,7 +152,10 @@ class MessageProcessor:
         return records
 
 
-def _recipient_emails(recipients: object) -> list[str]:
+def _recipient_emails(recipients: list[Recipient]) -> list[str]:
+    """
+    Extract normalized email addresses from a list of Recipient objects.
+    """
     emails: list[str] = []
     for recipient in recipients:
         email = normalize_email(getattr(recipient, "email", None))

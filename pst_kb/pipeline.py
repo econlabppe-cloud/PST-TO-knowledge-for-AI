@@ -10,7 +10,7 @@ from pst_kb.config import AppConfig
 from pst_kb.deduplication import Deduplicator
 from pst_kb.exporters import DatasetExporter
 from pst_kb.extractors import ExtractionOptions, ExtractorError, ExtractorUnavailable, ReadpstExtractor
-from pst_kb.models import AttachmentRecord, MessageRecord, ProcessingError, ProcessingReport
+from pst_kb.models import AttachmentRecord, MessageRecord, ProcessingError, ProcessingReport, ThreadRecord
 from pst_kb.parsers import EmailParser
 from pst_kb.processor import MessageProcessor
 from pst_kb.threading import ThreadBuilder
@@ -19,6 +19,10 @@ logger = logging.getLogger(__name__)
 
 
 class PstKbPipeline:
+    """
+    Main orchestration class for the PST processing pipeline.
+    """
+
     def __init__(self, config: AppConfig) -> None:
         self.config = config
         if config.output_dir is None:
@@ -27,6 +31,9 @@ class PstKbPipeline:
         self.exporter = DatasetExporter(self.output_dir, include_sqlite=config.export_sqlite)
 
     def run(self) -> ProcessingReport:
+        """
+        Executes the pipeline: find PST files, extract, parse, process, deduplicate, thread, and export.
+        """
         report = ProcessingReport()
         self.output_dir.mkdir(parents=True, exist_ok=True)
         staging_dir = self.output_dir / "_staging"
@@ -125,8 +132,11 @@ class PstKbPipeline:
         report: ProcessingReport,
         messages: list[MessageRecord],
         attachments: list[AttachmentRecord],
-        threads: Iterable[object],
+        threads: Iterable[ThreadRecord],
     ) -> ProcessingReport:
+        """
+        Finalizes the report and exports the results.
+        """
         report.finished_at = datetime.now(timezone.utc)
         if messages or attachments or threads:
             self.exporter.export(messages, attachments, list(threads), report)
@@ -135,6 +145,9 @@ class PstKbPipeline:
         return report
 
     def _find_pst_files(self) -> list[Path]:
+        """
+        Scans the input directory (or single file) for PST files.
+        """
         if self.config.single_file:
             single = self.config.single_file
             if not single.exists():

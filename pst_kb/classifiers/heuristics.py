@@ -34,10 +34,15 @@ class HeuristicClassifier:
                 "complaint",
                 "unhappy",
                 "not acceptable",
+                "dissatisfied",
+                "disappointing",
                 "בעיה",
                 "תלונה",
                 "לא תקין",
                 "לא מרוצה",
+                "מאוכזב",
+                "מאוכזבת",
+                "גרוע",
             ],
         )
         request = _contains_any(
@@ -47,11 +52,14 @@ class HeuristicClassifier:
                 "request",
                 "can you",
                 "could you",
+                "kindly",
                 "אשמח",
                 "מבקש",
                 "מבקשת",
                 "נא",
                 "אפשר",
+                "לתשומת לבך",
+                "טיפולך",
             ],
         )
         urgent = _contains_any(
@@ -60,10 +68,14 @@ class HeuristicClassifier:
                 "urgent",
                 "asap",
                 "immediately",
+                "priority",
+                "critical",
                 "דחוף",
                 "בהקדם",
                 "מיידי",
                 "מיידית",
+                "בהקדם האפשרי",
+                "קריטי",
             ],
         )
         has_question = "?" in text or "؟" in text or _contains_any(text, ["האם", "מדוע", "למה", "איך", "מתי"])
