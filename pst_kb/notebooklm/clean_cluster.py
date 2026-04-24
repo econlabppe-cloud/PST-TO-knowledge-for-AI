@@ -87,8 +87,8 @@ HEBREW_STOPWORDS = {
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Clean and cluster emails_raw.csv for NotebookLM.")
-    parser.add_argument("--input-csv", type=Path, required=True)
-    parser.add_argument("--output-csv", type=Path, required=True)
+    parser.add_argument("--input-csv", "--input", dest="input_csv", type=Path, required=True)
+    parser.add_argument("--output-csv", "--output", dest="output_csv", type=Path, required=True)
     parser.add_argument("--model-name", default=DEFAULT_MODEL_NAME)
     parser.add_argument("--embedding-backend", choices=["auto", "sentence-transformers", "tfidf"], default="auto")
     parser.add_argument("--min-words", type=int, default=50)

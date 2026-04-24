@@ -37,6 +37,10 @@ dev = [
 
 [project.scripts]
 pst-kb = "pst_kb.cli:main"
+pst-kb-notebook = "pst_kb.notebooklm.workflow:main"
+pst-kb-extract = "pst_kb.notebooklm.extract_csv:main"
+pst-kb-clean = "pst_kb.notebooklm.clean_cluster:main"
+pst-kb-pack = "pst_kb.notebooklm.notebook_pack_text:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -40,8 +40,20 @@ REQUIRED_COLUMNS = [
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Build a Word-based NotebookLM knowledge pack from clustered/tagged emails.")
-    parser.add_argument("--input-csv", type=Path, default=Path("data/intermediate/emails_clustered.csv"))
-    parser.add_argument("--output-dir", type=Path, default=Path("data/output/notebooklm_pack_word"))
+    parser.add_argument(
+        "--input-csv",
+        "--input",
+        dest="input_csv",
+        type=Path,
+        default=Path("data/intermediate/emails_clustered.csv"),
+    )
+    parser.add_argument(
+        "--output-dir",
+        "--output",
+        dest="output_dir",
+        type=Path,
+        default=Path("data/output/notebooklm_pack_word"),
+    )
     parser.add_argument("--topic-source", choices=["rules", "hybrid", "llm", "cluster"], default="rules")
     parser.add_argument("--max-source-chars", type=int, default=160_000)
     parser.add_argument("--max-emails-per-file", type=int, default=80)
@@ -476,11 +488,11 @@ def _render_guide(
             "NOTEBOOKLM GUIDE",
             "",
             "Recommended upload order:",
-            "1. 00_GUIDE.txt",
-            "2. 00_INDEX.txt",
-            "3. 01_TOPIC_MAP.txt",
-            "4. 02_PEOPLE_MAP.txt",
-            "5. 03_CLASSIFICATION_RULES.txt",
+            "1. 00_GUIDE.docx",
+            "2. 00_INDEX.docx",
+            "3. 01_TOPIC_MAP.docx",
+            "4. 02_PEOPLE_MAP.docx",
+            "5. 03_CLASSIFICATION_RULES.docx",
             "6. Relevant files from sources/",
             "",
             "How to use it:",
