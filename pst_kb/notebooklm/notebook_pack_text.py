@@ -28,6 +28,9 @@ REQUIRED_COLUMNS = [
     "cc_emails",
     "bcc_emails",
     "folder_path",
+    "parent_record_message_id",
+    "nested_depth",
+    "container_attachment_filename",
     "cluster_name",
     "llm_topic",
     "llm_subtopic",
@@ -252,10 +255,11 @@ def _write_topic_sources(
             title=topic,
         )
         rel_path = f"sources/{filename}"
-        for _, row in chunk.iterrows():
+        for email_index, (_, row) in enumerate(chunk.iterrows(), start=1):
             manifest_rows.append(
                 {
                     "source_file": rel_path,
+                    "source_locator": f"{rel_path} / EMAIL {email_index:04d}",
                     "knowledge_topic": row.get("knowledge_topic", ""),
                     "knowledge_subtopic": row.get("knowledge_subtopic", ""),
                     "knowledge_score": row.get("knowledge_score", ""),
@@ -266,6 +270,9 @@ def _write_topic_sources(
                     "from_email": row.get("from_email", ""),
                     "subject": row.get("subject", ""),
                     "folder_path": row.get("folder_path", ""),
+                    "parent_record_message_id": row.get("parent_record_message_id", ""),
+                    "nested_depth": row.get("nested_depth", ""),
+                    "container_attachment_filename": row.get("container_attachment_filename", ""),
                     "cluster_name": row.get("cluster_name", ""),
                     "llm_topic": row.get("llm_topic", ""),
                     "llm_confidence": row.get("llm_confidence", ""),
@@ -302,18 +309,19 @@ def _render_source_file(
         "------------------------------------------------------------",
         "",
     ]
-    for _, row in group.iterrows():
-        lines.append(_render_email(row, max_body_chars=max_body_chars))
+    for email_index, (_, row) in enumerate(group.iterrows(), start=1):
+        lines.append(_render_email(row, max_body_chars=max_body_chars, email_index=email_index))
     return "\n".join(lines).strip() + "\n"
 
 
-def _render_email(row: pd.Series, max_body_chars: int) -> str:
+def _render_email(row: pd.Series, max_body_chars: int, email_index: int | None = None) -> str:
     body = str(row.get("body_for_pack") or "")
     if len(body) > max_body_chars:
         body = body[:max_body_chars].rstrip() + "\n[body truncated for NotebookLM sizing]"
 
+    email_label = f"EMAIL {email_index:04d}" if email_index is not None else "EMAIL"
     lines = [
-        "EMAIL",
+        email_label,
         f"Message ID: {row.get('message_id', '')}",
         f"Date: {_format_date(row.get('date_sort'))}",
         f"From: {row.get('from_email', '')}",
@@ -323,6 +331,9 @@ def _render_email(row: pd.Series, max_body_chars: int) -> str:
         f"Subject: {row.get('subject', '')}",
         f"Subject Normalized: {row.get('subject_normalized', '')}",
         f"Folder: {row.get('folder_path', '')}",
+        f"Parent Message ID: {row.get('parent_record_message_id', '')}",
+        f"Nested Depth: {row.get('nested_depth', '')}",
+        f"Container: {row.get('container_attachment_filename', '')}",
         f"Knowledge Topic: {row.get('knowledge_topic', '')}",
         f"Knowledge Subtopic: {row.get('knowledge_subtopic', '')}",
         f"Knowledge Score: {row.get('knowledge_score', '')}",

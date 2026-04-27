@@ -26,6 +26,21 @@ def test_curated_rules_classify_business_email() -> None:
     assert match.is_system_noise is False
 
 
+def test_curated_rules_classify_retiree_documents_request() -> None:
+    row = {
+        "subject": "מסמכים ואישור שנתי",
+        "body": "אבקש לשלוח אישור שנתי וטופס 106 עבור גמלאי רשות השידור.",
+        "clean_body": "אבקש לשלוח אישור שנתי וטופס 106 עבור גמלאי רשות השידור.",
+        "folder_path": "Inbox",
+        "from_email": "hr2@iba.org.il",
+    }
+
+    match = classify_email_record_corpus(row, topic_source="rules")
+
+    assert match.topic == "מסמכים, אישורים וטפסים"
+    assert match.review_required is False
+
+
 def test_curated_rules_detect_system_noise() -> None:
     row = {
         "subject": "Delivery Status Notification",
@@ -101,3 +116,4 @@ def test_word_pack_outputs_docx_sources_and_manifest(tmp_path: Path) -> None:
     manifest = pd.read_csv(outputs["manifest"], dtype=str, keep_default_na=False, encoding="utf-8-sig")
     assert not manifest.empty
     assert manifest["source_file"].str.endswith(".docx").all()
+    assert manifest["source_locator"].str.contains("EMAIL").all()

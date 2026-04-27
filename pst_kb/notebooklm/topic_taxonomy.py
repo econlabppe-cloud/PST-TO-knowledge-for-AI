@@ -5,140 +5,203 @@ from pst_kb.notebooklm import topic_classifier as base
 
 CURATED_TOPIC_RULES: tuple[base.TopicRule, ...] = (
     base.TopicRule(
-        name="גמלאות, פרישה וזכאות",
-        keywords=("גמלה", "גמלאות", "קצבה", "קצבאות", "פרישה", "פורש", "פורשים", "זכאות", "retirement", "eligibility"),
-        subtopics=(
-            base.SubtopicRule("זכאות לפרישה", ("זכאות", "פרישה", "retirement")),
-            base.SubtopicRule("קצבה וגמלה", ("גמלה", "קצבה", "קצבאות")),
-            base.SubtopicRule("תנאים והחלטות", ("תנאים", "החלטה", "החלטות", "קביעה")),
-            base.SubtopicRule("מועדי תחולה", ("מועד", "מועדים", "תחולה", "effective")),
+        name="פניות גמלאים וזכאות",
+        keywords=(
+            "גמלאי",
+            "גמלאים",
+            "גימלה",
+            "גמלה",
+            "קצבה",
+            "קצבאות",
+            "זכאות",
+            "פרישה",
+            "פנסיה",
+            "רשות השידור",
+            "retiree",
+            "retirement",
+            "pension",
         ),
-        priority=7,
+        subtopics=(
+            base.SubtopicRule("בירור זכאות", ("זכאות", "זכאי", "פרישה", "retirement")),
+            base.SubtopicRule("קצבה וגמלה", ("גמלה", "גימלה", "קצבה", "קצבאות")),
+            base.SubtopicRule("פניות גמלאים כלליות", ("גמלאי", "גמלאים", "רשות השידור")),
+        ),
+        priority=9,
     ),
     base.TopicRule(
-        name="פנסיה צוברת, תקציבית ורציפות",
-        keywords=("פנסיה", "פנסיוני", "קרן", "קרנות", "צוברת", "תקציבית", "רציפות", "העברה", "משיכת כספים", "pension"),
-        subtopics=(
-            base.SubtopicRule("פנסיה צוברת", ("פנסיה צוברת", "צוברת")),
-            base.SubtopicRule("פנסיה תקציבית", ("פנסיה תקציבית", "תקציבית")),
-            base.SubtopicRule("רציפות זכויות", ("רציפות", "רציפות זכויות")),
-            base.SubtopicRule("מעבר בין מסלולים", ("העברה", "מעבר", "מסלול")),
-            base.SubtopicRule("משיכת כספים", ("משיכת כספים", "משיכה")),
+        name="מסמכים, אישורים וטפסים",
+        keywords=(
+            "מסמכים",
+            "מסמך",
+            "אישור",
+            "אישורים",
+            "טופס",
+            "טפסים",
+            "אישור מס",
+            "טופס 106",
+            "טופס 161",
+            "אישור שנתי",
+            "תלוש",
+            "תלושים",
+            "צילום תעודה",
+            "צילום תז",
+            "מסמכי",
+            "documents",
+            "certificate",
+            "form",
         ),
-        priority=6,
-    ),
-    base.TopicRule(
-        name="תחשיבים, שכר קובע ומקדמות",
-        keywords=("תחשיב", "תחשיבים", "חישוב", "חישובי", "שכר קובע", "מקדמה", "מקדמות", "אחוז", "אחוזים", "סימולציה", "simulation", "calc", "יוקר"),
         subtopics=(
-            base.SubtopicRule("שכר קובע", ("שכר קובע", "שכר")),
-            base.SubtopicRule("אחוזים ויחסים", ("אחוז", "אחוזים", "percent")),
-            base.SubtopicRule("מקדמות", ("מקדמה", "מקדמות")),
-            base.SubtopicRule("סימולציות וחישובים", ("סימולציה", "simulation", "חישוב")),
+            base.SubtopicRule("בקשת מסמכים", ("מסמכים", "מסמך", "documents")),
+            base.SubtopicRule("אישורים שנתיים", ("אישור", "אישורים", "אישור שנתי", "certificate")),
+            base.SubtopicRule("טפסי מס", ("106", "161", "אישור מס", "טופס")),
+            base.SubtopicRule("תלושי גמלה", ("תלוש", "תלושים")),
         ),
         priority=8,
     ),
     base.TopicRule(
-        name="פניות, בקשות ומסמכים",
-        keywords=("פנייה", "פניות", "בקשה", "בקשות", "מסמכים", "בירור סטטוס", "עדכון פרטים", "מענה", "request", "inquiry", "status"),
-        subtopics=(
-            base.SubtopicRule("בקשות מסמכים", ("מסמכים", "בקשה", "בקשות")),
-            base.SubtopicRule("בירור סטטוס", ("בירור", "סטטוס", "status")),
-            base.SubtopicRule("עדכון פרטים", ("עדכון", "פרטים")),
-            base.SubtopicRule("פניות גמלאים", ("גמלאים", "גמלאי")),
-            base.SubtopicRule("פניות עובדים", ("עובדים", "עובד")),
+        name="תשלומים, בנק וניכויים",
+        keywords=(
+            "תשלום",
+            "תשלומים",
+            "בנק",
+            "חשבון",
+            "חשבון בנק",
+            "העברה בנקאית",
+            "ניכוי",
+            "ניכויים",
+            "מס הכנסה",
+            "ביטוח לאומי",
+            "החזר",
+            "שיק",
+            "יתרה",
+            "payment",
+            "bank",
+            "refund",
         ),
-        priority=6,
+        subtopics=(
+            base.SubtopicRule("עדכון חשבון בנק", ("בנק", "חשבון בנק", "העברה בנקאית")),
+            base.SubtopicRule("ניכויים ומסים", ("ניכוי", "ניכויים", "מס הכנסה", "ביטוח לאומי")),
+            base.SubtopicRule("בירור תשלום", ("תשלום", "תשלומים", "payment")),
+            base.SubtopicRule("החזרים", ("החזר", "refund")),
+        ),
+        priority=8,
     ),
     base.TopicRule(
-        name="מידע, הרשאות והעברת נתונים",
-        keywords=("מידע", "נתונים", "הרשאה", "הרשאות", "גישה", "מאגר", "מאגרי מידע", "העברת מידע", "access", "permissions"),
-        subtopics=(
-            base.SubtopicRule("בקשות מידע", ("מידע", "נתונים")),
-            base.SubtopicRule("הרשאות וגישה", ("הרשאה", "הרשאות", "גישה")),
-            base.SubtopicRule("העברת נתונים", ("העברה", "העברת מידע", "נתונים")),
-            base.SubtopicRule("מאגרי מידע", ("מאגר", "מאגרי מידע")),
+        name="שכר קובע, חישובים ורצף שירות",
+        keywords=(
+            "שכר קובע",
+            "חישוב",
+            "חישובים",
+            "תחשיב",
+            "וותק",
+            "ותק",
+            "רצף",
+            "רציפות",
+            "תקופת עבודה",
+            "אחוז",
+            "אחוזים",
+            "מקדמה",
+            "calc",
+            "simulation",
         ),
-        priority=5,
-    ),
-    base.TopicRule(
-        name="ממשקים, דיווח ומרכבה",
-        keywords=("ממשק", "ממשקים", "מרכבה", "דיווח", "דיווחים", "טפסים", "קליטה", "ייצוא", "bi", "sap", "ess", "interface", "report"),
         subtopics=(
-            base.SubtopicRule("מרכבה", ("מרכבה", "merkava")),
-            base.SubtopicRule("דיווחים", ("דיווח", "דיווחים", "report")),
-            base.SubtopicRule("ממשקים", ("ממשק", "ממשקים", "interface")),
-            base.SubtopicRule("טפסים וקליטה", ("טפסים", "קליטה", "ייצוא")),
-            base.SubtopicRule("מערכות ותמיכה טכנית", ("bi", "sap", "ess", "system")),
-        ),
-        priority=6,
-    ),
-    base.TopicRule(
-        name="הסכמים, מכרזים וספקים",
-        keywords=("חוזה", "חוזים", "הסכם", "הסכמים", "התקשרות", "התקשרויות", "מכרז", "מכרזים", "ספק", "ספקים", "חשבונית", "invoice", "הזמנה"),
-        subtopics=(
-            base.SubtopicRule("מכרזים", ("מכרז", "מכרזים")),
-            base.SubtopicRule("הסכמים", ("הסכם", "הסכמים")),
-            base.SubtopicRule("ספקים וחשבוניות", ("ספק", "ספקים", "חשבונית", "invoice")),
-            base.SubtopicRule("התקשרויות", ("התקשרות", "התקשרויות")),
-            base.SubtopicRule("הזמנות", ("הזמנה", "הזמנות")),
-        ),
-        priority=5,
-    ),
-    base.TopicRule(
-        name="תשלומים, חוב וניכויים",
-        keywords=("תשלום", "תשלומים", "חוב", "חובות", "גבייה", "ניכוי", "ניכויים", "החזר", "החזרים", "שיפוי", "refund", "debit"),
-        subtopics=(
-            base.SubtopicRule("תשלומים", ("תשלום", "תשלומים")),
-            base.SubtopicRule("חוב וגבייה", ("חוב", "חובות", "גבייה")),
-            base.SubtopicRule("החזר ושיפוי", ("החזר", "החזרים", "שיפוי", "refund")),
-            base.SubtopicRule("ניכויים", ("ניכוי", "ניכויים", "debit")),
-        ),
-        priority=5,
-    ),
-    base.TopicRule(
-        name="תביעות, ערעורים והליכים משפטיים",
-        keywords=("תביעה", "תביעות", "ערעור", "ערעורים", "הליך", "הליכים", "משפטי", "legal", "פסק דין", "court", "appeal"),
-        subtopics=(
-            base.SubtopicRule("ערעורים", ("ערעור", "ערעורים", "appeal")),
-            base.SubtopicRule("תביעות", ("תביעה", "תביעות")),
-            base.SubtopicRule("הליכים משפטיים", ("הליך", "הליכים", "משפטי", "legal")),
-            base.SubtopicRule("פסקי דין", ("פסק דין", "court")),
-        ),
-        priority=6,
-    ),
-    base.TopicRule(
-        name="שאירים, אלמנות ויתומים",
-        keywords=("שאיר", "שאירים", "אלמנה", "אלמנת", "יתום", "יתומים", "בן זוג", "בת זוג", "survivor"),
-        subtopics=(
-            base.SubtopicRule("שאירים", ("שאיר", "שאירים")),
-            base.SubtopicRule("אלמנות", ("אלמנה", "אלמנת")),
-            base.SubtopicRule("יתומים", ("יתום", "יתומים")),
-            base.SubtopicRule("בני זוג", ("בן זוג", "בת זוג")),
+            base.SubtopicRule("שכר קובע", ("שכר קובע",)),
+            base.SubtopicRule("חישובי גמלה", ("חישוב", "חישובים", "תחשיב", "simulation")),
+            base.SubtopicRule("וותק ורצף שירות", ("וותק", "ותק", "רצף", "רציפות", "תקופת עבודה")),
+            base.SubtopicRule("אחוזים ומקדמות", ("אחוז", "אחוזים", "מקדמה")),
         ),
         priority=7,
     ),
     base.TopicRule(
-        name="נהלים, הדרכות וישיבות",
-        keywords=("נוהל", "נהלים", "הדרכה", "הדרכות", "פגישה", "פגישות", "ישיבה", "ישיבות", "מצגת", "מצגות", "סיכום דיון", "meeting", "training", "manual"),
-        subtopics=(
-            base.SubtopicRule("נהלים", ("נוהל", "נהלים")),
-            base.SubtopicRule("הדרכות", ("הדרכה", "הדרכות", "training")),
-            base.SubtopicRule("ישיבות ופגישות", ("פגישה", "פגישות", "ישיבה", "ישיבות", "meeting")),
-            base.SubtopicRule("מצגות וסיכומים", ("מצגת", "מצגות", "סיכום דיון")),
+        name="עדכון פרטים אישיים",
+        keywords=(
+            "עדכון פרטים",
+            "שינוי כתובת",
+            "כתובת",
+            "טלפון",
+            "נייד",
+            "מייל",
+            "דואר אלקטרוני",
+            "שם משפחה",
+            "מספר זהות",
+            "פרטים אישיים",
+            "update details",
         ),
-        priority=2,
+        subtopics=(
+            base.SubtopicRule("כתובת וטלפון", ("כתובת", "טלפון", "נייד")),
+            base.SubtopicRule("מייל ותקשורת", ("מייל", "דואר אלקטרוני")),
+            base.SubtopicRule("פרטי זיהוי", ("מספר זהות", "שם משפחה", "פרטים אישיים")),
+        ),
+        priority=7,
     ),
     base.TopicRule(
-        name="בקרות, דוחות וביקורות",
-        keywords=("בקרה", "בקרות", "ביקורת", "ביקורות", "דוח", "דוחות", "מעקב", "סטטוס", "audit", "report"),
-        subtopics=(
-            base.SubtopicRule("ביקורות", ("ביקורת", "ביקורות")),
-            base.SubtopicRule("דוחות", ("דוח", "דוחות")),
-            base.SubtopicRule("בקרות ומעקב", ("בקרה", "בקרות", "מעקב")),
-            base.SubtopicRule("סטטוס ניהולי", ("סטטוס", "ניהולי")),
+        name="שאירים, פטירה והעברת זכויות",
+        keywords=(
+            "שאירים",
+            "שאירים",
+            "אלמנה",
+            "אלמן",
+            "בן זוג",
+            "בת זוג",
+            "פטירה",
+            "נפטר",
+            "יורשים",
+            "עזבון",
+            "survivor",
         ),
-        priority=3,
+        subtopics=(
+            base.SubtopicRule("זכויות שאירים", ("שאירים", "שארים", "survivor")),
+            base.SubtopicRule("אלמן ואלמנה", ("אלמנה", "אלמן", "בן זוג", "בת זוג")),
+            base.SubtopicRule("פטירה ויורשים", ("פטירה", "נפטר", "יורשים", "עזבון")),
+        ),
+        priority=7,
+    ),
+    base.TopicRule(
+        name="ערעורים, תלונות וטיפול חריג",
+        keywords=(
+            "ערעור",
+            "ערעורים",
+            "תלונה",
+            "תלונות",
+            "בירור",
+            "בקשה חריגה",
+            "דחוף",
+            "בעיה",
+            "תקלה",
+            "טעות",
+            "complaint",
+            "appeal",
+        ),
+        subtopics=(
+            base.SubtopicRule("ערעורים", ("ערעור", "ערעורים", "appeal")),
+            base.SubtopicRule("תלונות", ("תלונה", "תלונות", "complaint")),
+            base.SubtopicRule("טיפול בבעיה", ("בעיה", "תקלה", "טעות", "דחוף")),
+        ),
+        priority=6,
+    ),
+    base.TopicRule(
+        name="פניות כלליות ושירות",
+        keywords=(
+            "שלום",
+            "מבקש",
+            "מבקשת",
+            "אבקש",
+            "אשמח",
+            "שאלה",
+            "בירור",
+            "פניה",
+            "פנייה",
+            "מידע",
+            "עזרה",
+            "request",
+            "inquiry",
+        ),
+        subtopics=(
+            base.SubtopicRule("בקשה כללית", ("מבקש", "מבקשת", "אבקש", "אשמח")),
+            base.SubtopicRule("שאלה ובירור", ("שאלה", "בירור", "inquiry")),
+            base.SubtopicRule("בקשת עזרה", ("עזרה", "מידע", "request")),
+        ),
+        priority=4,
     ),
 )
 
@@ -158,13 +221,12 @@ CURATED_SYSTEM_TERMS: tuple[str, ...] = (
     "automatic reply",
     "out of office",
     "security risk scan",
-    "אמת את זהותך",
-    "תיבת הדואר שלך כמעט מלאה",
     "security alert",
     "sync issue",
     "sync issues",
     "calendar sync",
     "mail sync",
+    "outlook for android",
 )
 
 
@@ -178,7 +240,9 @@ def classify_email_record_corpus(
     body = str(_get_value(row, "clean_body", "") or _get_value(row, "body", "") or "")
     folder = str(_get_value(row, "folder_path", "") or "")
     sender = str(_get_value(row, "from_email", "") or "")
-    blob = " ".join((subject, body[:800], folder, sender)).lower()
+    container_name = str(_get_value(row, "container_attachment_filename", "") or "")
+    blob = " ".join((subject, body[:1800], folder, sender, container_name)).lower()
+
     if any(term.lower() in blob for term in CURATED_SYSTEM_TERMS):
         return base.TopicMatch(
             topic="מערכת / רעש",
@@ -190,16 +254,34 @@ def classify_email_record_corpus(
             source_mode="rules",
         )
 
-    return base.classify_email_record(
+    match = base.classify_email_record(
         row,
         topic_source=topic_source,
         rules=CURATED_TOPIC_RULES,
         min_score=min_score,
     )
 
+    if match.topic == "לבדיקה ידנית" and _looks_like_retiree_request(blob):
+        return base.TopicMatch(
+            topic="פניות כלליות ושירות",
+            subtopic="פניית גמלאי כללית",
+            score=4.5,
+            matched_terms=("hr2", "iba.org.il"),
+            review_required=False,
+            source_mode="rules",
+        )
+
+    return match
+
 
 def render_curated_rules_text() -> str:
     return base.render_rules_text(CURATED_TOPIC_RULES)
+
+
+def _looks_like_retiree_request(blob: str) -> bool:
+    domain_hints = ("hr2@iba.org.il", "iba.org.il", "רשות השידור", "גמלאי")
+    request_hints = ("gmail.com", "walla.co.il", "yahoo.com", "מבקש", "מבקשת", "אבקש", "מסמכים")
+    return any(term in blob for term in domain_hints) and any(term in blob for term in request_hints)
 
 
 def _get_value(row: object, key: str, default: object = None) -> object:

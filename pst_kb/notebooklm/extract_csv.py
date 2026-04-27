@@ -25,6 +25,9 @@ logger = logging.getLogger(__name__)
 RAW_COLUMNS = [
     "message_id",
     "thread_id",
+    "parent_record_message_id",
+    "nested_depth",
+    "container_attachment_filename",
     "subject",
     "body",
     "from_email",
@@ -150,8 +153,8 @@ def _extract_with_readpst(
         rows: list[dict[str, object]] = []
         for ref in tqdm(refs, desc="Parsing EML", unit="email"):
             try:
-                raw = parser.parse_eml(ref)
-                rows.append(_raw_message_to_row(raw, extractor_name="readpst", cleaner=cleaner))
+                for raw in parser.parse_eml_with_nested(ref):
+                    rows.append(_raw_message_to_row(raw, extractor_name="readpst", cleaner=cleaner))
             except Exception as exc:
                 logger.warning("Skipping broken EML %s: %s", ref.eml_path, exc)
         return rows
@@ -243,6 +246,9 @@ def _raw_message_to_row(raw: RawMessage, extractor_name: str, cleaner: EmailClea
     return {
         "message_id": msg_id,
         "thread_id": raw.conversation_id or raw.in_reply_to or "",
+        "parent_record_message_id": raw.parent_record_message_id or "",
+        "nested_depth": raw.nested_depth,
+        "container_attachment_filename": raw.container_attachment_filename or "",
         "subject": raw.subject_raw or "",
         "body": body,
         "from_email": raw.sender_email or "",

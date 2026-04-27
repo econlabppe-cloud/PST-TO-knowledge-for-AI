@@ -60,6 +60,9 @@ class RawMessage(BaseModel):
     categories: list[str] = Field(default_factory=list)
     attachment_payloads: list[dict[str, object]] = Field(default_factory=list)
     extraction_errors: list[str] = Field(default_factory=list)
+    parent_record_message_id: str | None = None
+    nested_depth: int = 0
+    container_attachment_filename: str | None = None
 
 
 class MessageRecord(BaseModel):
@@ -94,6 +97,9 @@ class MessageRecord(BaseModel):
     internet_headers: dict[str, str] = Field(default_factory=dict)
     reply_forward_indicator: str | None = None
     parent_message_id: str | None = None
+    parent_record_message_id: str | None = None
+    nested_depth: int = 0
+    container_attachment_filename: str | None = None
     synthetic_thread_key: str | None = None
     mostly_quoted: bool = False
     content_hash: str

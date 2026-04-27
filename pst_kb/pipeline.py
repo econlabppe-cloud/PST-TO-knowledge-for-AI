@@ -84,24 +84,26 @@ class PstKbPipeline:
                     if extraction_limit_remaining is not None and extraction_limit_remaining <= 0:
                         break
                     try:
-                        raw = parser.parse_eml(ref)
-                        message, message_attachments = processor.process(raw)
-                        messages.append(message)
-                        attachments.extend(message_attachments)
-                        report.messages_processed += 1
-                        if self.config.skip_attachments:
-                            report.attachments_skipped += len(message_attachments)
-                        else:
-                            report.attachments_exported += sum(
-                                1 for item in message_attachments if item.saved_path and not item.export_error
-                            )
+                        for raw in parser.parse_eml_with_nested(ref):
+                            if extraction_limit_remaining is not None and extraction_limit_remaining <= 0:
+                                break
+                            message, message_attachments = processor.process(raw)
+                            messages.append(message)
+                            attachments.extend(message_attachments)
+                            report.messages_processed += 1
+                            if self.config.skip_attachments:
+                                report.attachments_skipped += len(message_attachments)
+                            else:
+                                report.attachments_exported += sum(
+                                    1 for item in message_attachments if item.saved_path and not item.export_error
+                                )
+                            if extraction_limit_remaining is not None:
+                                extraction_limit_remaining -= 1
                     except Exception as exc:
                         logger.exception("Failed to process %s", ref.eml_path)
                         report.errors.append(
                             ProcessingError(source=str(ref.eml_path), message="message_processing_failed", detail=str(exc))
                         )
-                    if extraction_limit_remaining is not None:
-                        extraction_limit_remaining -= 1
 
             messages = Deduplicator().mark_duplicates(messages)
             messages, threads = ThreadBuilder().assign_threads(messages)
