@@ -178,18 +178,114 @@ def _extract_nested_message(part: Message, errors: list[str]) -> Message | None:
 
 
 def _safe_get_content(part: Message, errors: list[str]) -> str:
+    payload = _get_text_payload_bytes(part)
+    if payload:
+        decoded = _decode_text_payload(payload, part.get_content_charset())
+        if decoded:
+            return decoded
+
     try:
         content = part.get_content()
-        return content if isinstance(content, str) else str(content)
+        text = content if isinstance(content, str) else str(content)
+        return _repair_text(text)
     except Exception as exc:
         errors.append(f"body_decode_error:{part.get_content_type()}:{exc}")
         try:
-            payload = part.get_payload(decode=True) or b""
             charset = part.get_content_charset() or "utf-8"
-            return payload.decode(charset, errors="replace")
+            return _repair_text(payload.decode(charset, errors="replace")) if payload else ""
         except Exception as nested_exc:
             errors.append(f"body_decode_fallback_error:{nested_exc}")
             return ""
+
+
+def _get_text_payload_bytes(part: Message) -> bytes:
+    try:
+        decoded = part.get_payload(decode=True)
+        if isinstance(decoded, bytes):
+            return decoded
+    except Exception:
+        pass
+
+    try:
+        payload = part.get_payload(decode=False)
+    except Exception:
+        return b""
+
+    if isinstance(payload, str):
+        charset = part.get_content_charset() or "utf-8"
+        for encoding in (charset, "utf-8", "windows-1255", "latin-1"):
+            try:
+                return payload.encode(encoding, errors="surrogateescape")
+            except Exception:
+                continue
+        return payload.encode("utf-8", errors="replace")
+    return b""
+
+
+def _decode_text_payload(payload: bytes, declared_charset: str | None) -> str:
+    # readpst/Outlook exports often carry a wrong MIME charset. Decode several
+    # plausible encodings and choose the least damaged Hebrew-friendly text.
+    encodings: list[str] = []
+    seen: set[str] = set()
+    for encoding in (
+        declared_charset,
+        "utf-8",
+        "utf-8-sig",
+        "windows-1255",
+        "cp1255",
+        "iso-8859-8",
+        "cp1252",
+        "latin-1",
+    ):
+        if not encoding:
+            continue
+        normalized = encoding.lower()
+        if normalized not in seen:
+            seen.add(normalized)
+            encodings.append(encoding)
+
+    candidates: list[str] = []
+    for encoding in encodings:
+        try:
+            candidates.append(payload.decode(encoding, errors="strict"))
+        except Exception:
+            try:
+                candidates.append(payload.decode(encoding, errors="replace"))
+            except Exception:
+                continue
+
+    repaired_candidates = [_repair_text(candidate) for candidate in candidates if candidate]
+    return max(repaired_candidates, key=_text_quality_score, default="").strip()
+
+
+def _text_quality_score(value: str) -> float:
+    if not value:
+        return -1_000_000
+
+    length = max(len(value), 1)
+    replacement_count = value.count("\ufffd") + value.count("?")
+    hebrew_count = sum("\u05d0" <= char <= "\u05ea" for char in value)
+    latin_count = sum("a" <= char.lower() <= "z" for char in value)
+    printable_count = sum(char.isprintable() or char in "\r\n\t" for char in value)
+    mojibake_markers = (
+        value.count("×")
+        + value.count("Ã")
+        + value.count("Â")
+        + value.count("׳")
+        + value.count("ֲ")
+        + value.count("ג€")
+        + value.count("ן¿½")
+    )
+    control_count = sum((ord(char) < 32 and char not in "\r\n\t") or 127 <= ord(char) <= 159 for char in value)
+
+    return (
+        printable_count / length * 20
+        + hebrew_count * 3
+        + latin_count * 0.25
+        - replacement_count * 50
+        - mojibake_markers * 30
+        - control_count * 15
+    )
 
 
 def _parse_recipients(values: list[str]) -> list[Recipient]:
@@ -475,12 +571,21 @@ def _sender_from_mbox_line(line: str) -> str:
 def _repair_text(value: str) -> str:
     if not value:
         return ""
-    # Repair the common UTF-8-as-Latin-1 mojibake pattern without touching valid Hebrew.
-    if "×" in value and not any("\u0590" <= char <= "\u05ff" for char in value):
-        try:
-            repaired = value.encode("latin-1", errors="strict").decode("utf-8", errors="strict")
-            if sum("\u0590" <= char <= "\u05ff" for char in repaired) > 0:
-                return repaired
-        except Exception:
-            pass
-    return value
+    candidates = [value]
+    queue = [value]
+    for _ in range(2):
+        next_queue: list[str] = []
+        for candidate in queue:
+            for encoding in ("latin-1", "cp1252", "cp1255"):
+                try:
+                    repaired = candidate.encode(encoding, errors="strict").decode("utf-8", errors="strict")
+                except Exception:
+                    try:
+                        repaired = candidate.encode(encoding, errors="replace").decode("utf-8", errors="replace")
+                    except Exception:
+                        continue
+                if repaired and repaired not in candidates:
+                    candidates.append(repaired)
+                    next_queue.append(repaired)
+        queue = next_queue
+    return max(candidates, key=_text_quality_score)

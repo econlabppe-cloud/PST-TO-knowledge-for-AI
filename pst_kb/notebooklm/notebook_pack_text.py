@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import logging
 from collections import Counter
+from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
@@ -120,6 +121,7 @@ def build_notebooklm_pack(
     audit_dir = output_dir / "audit"
     sources_dir.mkdir(parents=True, exist_ok=True)
     audit_dir.mkdir(parents=True, exist_ok=True)
+    _clear_generated_outputs(output_dir, sources_dir)
 
     manifest_rows: list[dict[str, object]] = []
     topic_rows: list[dict[str, object]] = []
@@ -150,11 +152,11 @@ def build_notebooklm_pack(
     review_path = output_dir / "review_queue.csv"
     excluded_path = audit_dir / "excluded_records.csv"
 
-    manifest.to_csv(manifest_path, index=False, encoding="utf-8-sig")
-    topics.to_csv(topics_path, index=False, encoding="utf-8-sig")
-    people.to_csv(people_path, index=False, encoding="utf-8-sig")
-    review.to_csv(review_path, index=False, encoding="utf-8-sig")
-    excluded.drop(columns=["date_sort"], errors="ignore").to_csv(excluded_path, index=False, encoding="utf-8-sig")
+    manifest_path = _safe_write_csv(manifest, manifest_path)
+    topics_path = _safe_write_csv(topics, topics_path)
+    people_path = _safe_write_csv(people, people_path)
+    review_path = _safe_write_csv(review, review_path)
+    excluded_path = _safe_write_csv(excluded.drop(columns=["date_sort"], errors="ignore"), excluded_path)
 
     guide_path = output_dir / "00_GUIDE.docx"
     index_path = output_dir / "00_INDEX.docx"
@@ -184,6 +186,44 @@ def build_notebooklm_pack(
         "review_csv": review_path,
         "excluded": excluded_path,
     }
+
+
+def _safe_write_csv(frame: pd.DataFrame, path: Path) -> Path:
+    try:
+        frame.to_csv(path, index=False, encoding="utf-8-sig")
+        return path
+    except PermissionError:
+        fallback = path.with_name(f"{path.stem}_{datetime.now().strftime('%Y%m%d_%H%M%S')}{path.suffix}")
+        logger.warning("CSV file is locked, writing fallback copy: %s", fallback)
+        frame.to_csv(fallback, index=False, encoding="utf-8-sig")
+        return fallback
+
+
+def _clear_generated_outputs(output_dir: Path, sources_dir: Path) -> None:
+    for path in sources_dir.glob("*.docx"):
+        try:
+            path.unlink()
+        except PermissionError:
+            logger.warning("Old source file is locked and could not be removed: %s", path)
+
+    for filename in (
+        "00_GUIDE.docx",
+        "00_INDEX.docx",
+        "00_TOPIC_MAP.docx",
+        "00_PEOPLE_MAP.docx",
+        "00_CLASSIFICATION_RULES.docx",
+        "00_REVIEW_QUEUE.docx",
+        "records_manifest.csv",
+        "topics_index.csv",
+        "people_index.csv",
+        "review_queue.csv",
+    ):
+        path = output_dir / filename
+        if path.exists():
+            try:
+                path.unlink()
+            except PermissionError:
+                logger.warning("Old generated file is locked and will be overwritten with fallback if needed: %s", path)
 
 
 def _load_input(input_csv: Path) -> pd.DataFrame:

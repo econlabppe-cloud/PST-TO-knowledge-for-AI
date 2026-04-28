@@ -141,3 +141,66 @@ def test_parser_decodes_embedded_rfc822_headers(tmp_path: Path) -> None:
     assert messages[1].message_id == "inner-encoded@example.org"
     assert messages[1].subject_raw == "טופס 106"
     assert messages[1].sender_email == "sender@example.org"
+
+
+def test_parser_recovers_windows_1255_body_mislabeled_as_utf8(tmp_path: Path) -> None:
+    eml_path = tmp_path / "mislabeled_cp1255.eml"
+    body = "שלום, אבקש לבדוק זכאות לגמלה ולשלוח אישור שנתי."
+    raw_message = "\r\n".join(
+        [
+            "From: retiree@example.org",
+            "To: hr2@iba.org.il",
+            "Subject: =?windows-1255?B?8+Tv7CDn7+zh?=",
+            "Message-ID: <cp1255-body@example.org>",
+            "MIME-Version: 1.0",
+            'Content-Type: text/plain; charset="utf-8"',
+            "",
+            body,
+        ]
+    ).encode("windows-1255")
+    eml_path.write_bytes(raw_message)
+
+    ref = ExtractedMessageRef(
+        pst_path=tmp_path / "sample.pst",
+        eml_path=eml_path,
+        source_folder="Inbox",
+    )
+
+    messages = EmailParser().parse_eml_with_nested(ref)
+
+    assert len(messages) == 1
+    assert "אבקש לבדוק זכאות" in messages[0].body_text_raw
+    assert "�" not in messages[0].body_text_raw
+
+
+def test_parser_reduces_double_mojibake_from_readpst_exports(tmp_path: Path) -> None:
+    eml_path = tmp_path / "double_mojibake.eml"
+    original = "שלום, אבקש טופס 161 ותלוש גמלה."
+    first_pass = original.encode("utf-8").decode("cp1255", errors="replace")
+    double_mojibake = first_pass.encode("utf-8").decode("cp1255", errors="replace")
+    eml_path.write_text(
+        "\n".join(
+            [
+                "From: retiree@example.org",
+                "To: hr2@iba.org.il",
+                "Subject: Double mojibake",
+                "Message-ID: <double-mojibake@example.org>",
+                "MIME-Version: 1.0",
+                'Content-Type: text/plain; charset="utf-8"',
+                "",
+                double_mojibake,
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    ref = ExtractedMessageRef(
+        pst_path=tmp_path / "sample.pst",
+        eml_path=eml_path,
+        source_folder="Inbox",
+    )
+
+    messages = EmailParser().parse_eml_with_nested(ref)
+
+    assert "׳³" not in messages[0].body_text_raw
+    assert "161" in messages[0].body_text_raw

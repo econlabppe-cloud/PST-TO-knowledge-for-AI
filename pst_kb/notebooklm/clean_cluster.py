@@ -198,6 +198,8 @@ def prepare_clean_dataframe(df: pd.DataFrame, min_words: int, body_chars: int) -
 def filter_reason(row: pd.Series, subject: str, clean_body: str, words: int, min_words: int) -> tuple[bool, str]:
     if not clean_body.strip():
         return True, "empty_body"
+    if is_encoding_corrupt(clean_body):
+        return True, "encoding_corrupt"
 
     subject_lower = subject.lower()
     sender_lower = str(row.get("from_email", "")).lower()
@@ -208,6 +210,26 @@ def filter_reason(row: pd.Series, subject: str, clean_body: str, words: int, min
     if words < min_words and not contains_domain_term(clean_body + " " + subject):
         return True, "too_short"
     return False, ""
+
+
+def is_encoding_corrupt(text: str) -> bool:
+    if not text:
+        return False
+    sample = text[:4000]
+    replacement_count = sample.count("\ufffd")
+    mojibake_count = (
+        sample.count("׳³")
+        + sample.count("ן¿½")
+        + sample.count("ג€")
+        + sample.count("×")
+        + sample.count("Ã")
+    )
+    visible_count = max(sum(char.isprintable() and not char.isspace() for char in sample), 1)
+    if replacement_count >= 1:
+        return True
+    if mojibake_count >= 10:
+        return True
+    return (replacement_count + mojibake_count) / visible_count > 0.03
 
 
 def contains_domain_term(text: str) -> bool:
